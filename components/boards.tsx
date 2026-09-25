@@ -55,7 +55,7 @@ export function Overview() {
         <div className="rounded-2xl border bg-card/70 p-5">
           <h2 className="font-heading text-2xl">Airline</h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Saved in this browser. Reputation starts at 49% in the guide, so a new airline fills about half the seats until marketing is running.
+            Saved in this browser. Reputation starts at 49% in the guide, so a new airline fills about half the seats until marketing is running. On an Android phone, open this page in Chrome and choose Add to Home screen. After one visit, the desk still opens with no connection.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Field label="Name">
@@ -226,7 +226,7 @@ export function FleetBoard() {
           </p>
         )}
         <Button
-          className="mt-4"
+          className="mt-4 min-h-11 md:min-h-8"
           type="button"
           disabled={!picked}
           onClick={() => {
@@ -250,7 +250,57 @@ export function FleetBoard() {
           Add to fleet
         </Button>
       </section>
-      <div className="overflow-auto rounded-2xl border">
+      <div className="grid gap-3 md:hidden">
+        {airline.planes.map((owned) => {
+          const spec = plane(owned.aircraftId);
+          return (
+            <article key={owned.id} className="rounded-2xl border bg-card/80 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="font-mono text-lg text-primary">{owned.registration}</div>
+                  <p className="text-sm">{spec ? `${spec.name} · ${spec.engine}` : "Unknown type"}</p>
+                  {owned.notes && <p className="text-xs text-muted-foreground">{owned.notes}</p>}
+                </div>
+                <Button
+                  variant="ghost"
+                  className="min-h-11"
+                  type="button"
+                  onClick={() => patch({ planes: airline.planes.filter((item) => item.id !== owned.id) })}
+                >
+                  Remove
+                </Button>
+              </div>
+              <label className="mt-3 grid gap-1.5 text-sm">
+                <span className="text-xs tracking-[0.14em] text-muted-foreground uppercase">Route</span>
+                <select
+                  className="w-full rounded-lg border bg-transparent px-2"
+                  value={owned.routeId ?? ""}
+                  onChange={(event) =>
+                    patch({
+                      planes: airline.planes.map((item) =>
+                        item.id === owned.id ? { ...item, routeId: event.target.value || null } : item,
+                      ),
+                    })
+                  }
+                >
+                  <option value="">Unassigned</option>
+                  {airline.routes.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.hub}-{item.dest}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </article>
+          );
+        })}
+        {airline.planes.length === 0 && (
+          <p className="rounded-2xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+            No aircraft yet. Start with a DC-9-10 or BAe 146-300 if you are following the guide.
+          </p>
+        )}
+      </div>
+      <div className="hidden overflow-auto rounded-2xl border md:block">
         <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-muted/60 text-left text-xs tracking-wide text-muted-foreground uppercase">
             <tr>
@@ -558,6 +608,27 @@ export function ScheduleBoard() {
     return rows.sort((a, b) => a.idle - b.idle || b.dest.market - a.dest.market).slice(0, 40);
   }, [airline.fuelTraining, airline.mode, cadence, hub, onlyRunway, picked]);
 
+  const logMatch = (dest: string, ci: number) => {
+    patch({
+      routes: [
+        ...airline.routes,
+        {
+          id: newId(),
+          kind: picked?.type === "cargo" ? "cargo" : "pax",
+          hub,
+          dest,
+          stopover: "",
+          demandY: 0,
+          demandJ: 0,
+          demandF: 0,
+          demandL: 0,
+          demandH: 0,
+          notes: `${picked?.name ?? "Aircraft"} on a ${cadence}h slot, CI ${ci}`,
+        },
+      ],
+    });
+  };
+
   return (
     <div className="grid gap-4">
       <section className="rounded-2xl border bg-card/75 p-5">
@@ -594,7 +665,57 @@ export function ScheduleBoard() {
           </p>
         )}
       </section>
-      <div className="overflow-auto rounded-2xl border">
+      <div className="grid gap-3 md:hidden">
+        {matches.map((row) => (
+          <article key={row.dest.iata} className="rounded-2xl border bg-card/80 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="font-mono text-lg text-primary">{row.dest.iata}</div>
+                <p className="text-sm">
+                  {row.dest.name}, {row.dest.country}
+                </p>
+              </div>
+              <Button size="sm" variant="secondary" className="min-h-11" type="button" onClick={() => logMatch(row.dest.iata, row.ci)}>
+                Log route
+              </Button>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
+              <div>
+                <dt className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">Distance</dt>
+                <dd className="font-mono">{kmLabel(row.direct)}</dd>
+              </div>
+              <div>
+                <dt className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">Block</dt>
+                <dd className="font-mono">{hoursLabel(row.hours)}</dd>
+              </div>
+              <div>
+                <dt className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">Cost index</dt>
+                <dd className="font-mono">{row.ci}</dd>
+              </div>
+              <div>
+                <dt className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">Idle</dt>
+                <dd className="font-mono">{hoursLabel(row.idle)}</dd>
+              </div>
+            </dl>
+            <p className="mt-3 font-mono text-xs">
+              {row.prices
+                ? `${money(row.prices.y)} / ${money(row.prices.j)} / ${money(row.prices.f)}`
+                : row.cargo
+                  ? `${money(row.cargo.large)} / ${money(row.cargo.heavy)}`
+                  : "—"}
+            </p>
+            <p className="text-xs text-muted-foreground">{Math.round(row.fuel).toLocaleString()} lbs fuel</p>
+          </article>
+        ))}
+        {matches.length === 0 && (
+          <p className="rounded-2xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+            {picked && hub
+              ? "Nothing inside range can finish inside that slot. Try a longer gap, or a longer-range airplane."
+              : "Choose a hub and an airplane."}
+          </p>
+        )}
+      </div>
+      <div className="hidden overflow-auto rounded-2xl border md:block">
         <table className="w-full min-w-[860px] text-sm">
           <thead className="bg-muted/60 text-left text-xs tracking-wide text-muted-foreground uppercase">
             <tr>
@@ -629,31 +750,7 @@ export function ScheduleBoard() {
                   <div className="text-muted-foreground">{Math.round(row.fuel).toLocaleString()} lbs fuel</div>
                 </td>
                 <td className="px-3 py-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    type="button"
-                    onClick={() =>
-                      patch({
-                        routes: [
-                          ...airline.routes,
-                          {
-                            id: newId(),
-                            kind: picked?.type === "cargo" ? "cargo" : "pax",
-                            hub,
-                            dest: row.dest.iata,
-                            stopover: "",
-                            demandY: 0,
-                            demandJ: 0,
-                            demandF: 0,
-                            demandL: 0,
-                            demandH: 0,
-                            notes: `${picked?.name ?? "Aircraft"} on a ${cadence}h slot, CI ${row.ci}`,
-                          },
-                        ],
-                      })
-                    }
-                  >
+                  <Button size="sm" variant="secondary" type="button" onClick={() => logMatch(row.dest.iata, row.ci)}>
                     Log route
                   </Button>
                 </td>

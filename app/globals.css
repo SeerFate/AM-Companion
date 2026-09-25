@@ -135,4 +135,12 @@
   .font-heading {
     font-family: var(--font-heading-family), Georgia, serif;
   }
+  @media (max-width: 767px) {
+    input:not([type="checkbox"]),
+    select,
+    textarea {
+      min-height: 2.75rem;
+      font-size: 16px;
+    }
+  }
 }

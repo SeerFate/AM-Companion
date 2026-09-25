@@ -13,6 +13,10 @@ npm run dev
 
 The dev server in this workspace listens on port 43123.
 
+## Phone
+
+The same site is the Android app. In Chrome, open the menu and choose **Add to Home screen**. The icon opens the desk on its own, and after that first visit it still opens offline. Your airline stays in that browser, so move a copy between the computer and the phone with Export JSON and Import JSON.
+
 ## What it uses
 
 - The long “Everything about AM4” guide for play, not just the formulas: which planes, when to buy fuel, marketing, hubs, and the salary tip.

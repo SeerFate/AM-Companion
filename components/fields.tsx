@@ -179,7 +179,7 @@ export function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border bg-card/80 px-3 py-2">
       <div className="text-[11px] tracking-[0.16em] text-muted-foreground uppercase">{label}</div>
-      <div className="font-mono text-lg text-primary">{value}</div>
+      <div className="font-mono text-base break-words text-primary md:text-lg">{value}</div>
     </div>
   );
 }
