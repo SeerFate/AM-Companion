@@ -61,7 +61,7 @@ export function AirportPicker({
         {open && hits.length > 0 && (
           <ul
             id={listId}
-            className="absolute z-30 mt-1 max-h-64 w-full overflow-auto rounded-lg border bg-popover p-1 shadow-lg"
+            className="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-lg border bg-popover p-1 shadow-lg"
           >
             {hits.map((hit) => (
               <li key={hit.iata}>
@@ -114,7 +114,7 @@ export function AircraftPicker({
           onFocus={() => setOpen(true)}
         />
         {open && hits.length > 0 && (
-          <ul className="absolute z-30 mt-1 max-h-72 w-full overflow-auto rounded-lg border bg-popover p-1 shadow-lg">
+          <ul className="absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-lg border bg-popover p-1 shadow-lg">
             {hits.map((hit) => (
               <li key={hit.id}>
                 <button
