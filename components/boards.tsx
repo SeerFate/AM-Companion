@@ -55,7 +55,7 @@ export function Overview() {
         <div className="rounded-2xl border bg-card/70 p-5">
           <h2 className="font-heading text-2xl">Airline</h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Saved in this browser. Reputation starts at 49% in the guide, so a new airline fills about half the seats until marketing is running. On an Android phone, open this page in Chrome and choose Add to Home screen. After one visit, the desk still opens with no connection.
+            Saved on this device. Reputation starts at 49% in the guide, so a new airline fills about half the seats until marketing is running. The installed Android app keeps working with no connection. Move a copy to another device with Export JSON and Import JSON.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Field label="Name">

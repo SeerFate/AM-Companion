@@ -13,9 +13,24 @@ npm run dev
 
 The dev server in this workspace listens on port 43123.
 
-## Phone
+## Android
 
-The same site is the Android app. In Chrome, open the menu and choose **Add to Home screen**. The icon opens the desk on its own, and after that first visit it still opens offline. Your airline stays in that browser, so move a copy between the computer and the phone with Export JSON and Import JSON.
+`release/AM4-desk.apk` is the offline app. Copy it to the phone, allow installs from your files app, and open it. The desk is stored inside the APK, so the first launch works with no network and no server. Your airline stays on that phone. Move a copy to the computer, or back, with Export JSON and Import JSON.
+
+The package name is `com.am4desk.app`. Installing a newer build signed with a different key means uninstalling the old one first.
+
+To rebuild it:
+
+```bash
+npm install
+npm run build
+npx cap sync android
+cd android && ./gradlew assembleDebug
+```
+
+That requires a JDK and Android SDK 36. The debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+The browser version can still be installed from Chrome with **Add to Home screen** after one visit. That copy is cached. The APK does not need the visit.
 
 ## What it uses
 
