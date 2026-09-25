@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   airport,
   searchAircraft,
@@ -184,5 +183,3 @@ export function Stat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-export { Label };

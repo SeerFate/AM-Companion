@@ -400,6 +400,8 @@ function RouteCard({ route }: { route: SavedRoute }) {
   const { airline, patch } = useAirline();
   const distance = routeDistance(route.hub, route.dest, route.stopover);
   const assigned = airline.planes.filter((item) => item.routeId === route.id);
+  const update = (partial: Partial<SavedRoute>) =>
+    patch({ routes: airline.routes.map((item) => (item.id === route.id ? { ...item, ...partial } : item)) });
   const spec = assigned.map((item) => plane(item.aircraftId)).find(Boolean);
   const fill = loadFactor(airline.reputation);
   const direct = distance?.direct ?? 0;
@@ -443,7 +445,7 @@ function RouteCard({ route }: { route: SavedRoute }) {
       fuelTraining: airline.fuelTraining,
     });
     return { flights, prices, config, fuel, income: 0, slot };
-  }, [airline, assigned.length, direct, fill, flown, route, spec]);
+  }, [airline, assigned.length, direct, distance, fill, flown, route, spec]);
 
   return (
     <article className="rounded-2xl border bg-card/75 p-4">
@@ -469,6 +471,20 @@ function RouteCard({ route }: { route: SavedRoute }) {
         >
           Delete
         </Button>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        {route.kind === "pax" ? (
+          <>
+            <NumberField label="Economy / day" value={route.demandY} onChange={(demandY) => update({ demandY })} />
+            <NumberField label="Business / day" value={route.demandJ} onChange={(demandJ) => update({ demandJ })} />
+            <NumberField label="First / day" value={route.demandF} onChange={(demandF) => update({ demandF })} />
+          </>
+        ) : (
+          <>
+            <NumberField label="Large lbs / day" value={route.demandL} onChange={(demandL) => update({ demandL })} />
+            <NumberField label="Heavy lbs / day" value={route.demandH} onChange={(demandH) => update({ demandH })} />
+          </>
+        )}
       </div>
       {!spec && <p className="mt-3 text-sm text-muted-foreground">Assign a plane on the Fleet board to calculate seats.</p>}
       {plan && route.kind === "pax" && "seats" in plan.config && "y" in plan.prices && (
