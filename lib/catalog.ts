@@ -48,6 +48,12 @@ export function plane(id: number): Aircraft | undefined {
   return aircraftById.get(id);
 }
 
+export function engineVariants(kind: Aircraft["type"], name: string): Aircraft[] {
+  return aircraft
+    .filter((item) => item.type === kind && item.name === name)
+    .sort((a, b) => b.speed - a.speed || a.engine.localeCompare(b.engine));
+}
+
 export function searchAirports(query: string, limit = 8): Airport[] {
   const q = query.trim().toLowerCase();
   if (q.length < 2) return [];

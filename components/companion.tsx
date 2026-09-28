@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { FleetBoard, Handbook, Overview, RouteBoard, ScheduleBoard } from "@/components/boards";
+import { FleetBoard, Handbook, Overview, RouteBoard } from "@/components/boards";
+import { ResearchBoard } from "@/components/research";
 import { useAirline } from "@/lib/store";
 
 const TABS = [
   ["desk", "Desk"],
-  ["schedule", "Schedule"],
+  ["research", "Research"],
   ["routes", "Routes"],
   ["fleet", "Fleet"],
   ["guide", "Guide"],
@@ -59,7 +60,7 @@ export function Companion() {
         ) : (
           <>
             {tab === "desk" && <Overview />}
-            {tab === "schedule" && <ScheduleBoard />}
+            {tab === "research" && <ResearchBoard />}
             {tab === "routes" && <RouteBoard />}
             {tab === "fleet" && <FleetBoard />}
             {tab === "guide" && <Handbook />}
