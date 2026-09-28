@@ -222,6 +222,7 @@ export const guideSections: GuideSection[] = [
           "Cost index 200 is full speed. Index 0 is 30% of that speed. Lowering the index stretches a short flight so it finishes on your departure slot.",
           "Block time is flown kilometres divided by that speed. A stopover adds the two legs for time and fuel. Fares still use the straight-line distance.",
           "Seats are filled from the cabin that earns the most per economy-sized space, capped by demand divided by flights that day.",
+          "Research reads the published daily demand for each city pair. Large cargo demand is economy × 500. Heavy cargo demand is business × 1,000.",
           "On easy mode, first class wins that comparison under 14,425 km. Past about 15,200 km, economy wins. Realism flips later, and business leads through the middle band.",
           "Fill is your reputation percent, matching the guide. Community measurements put the real average a little under that when fares sit above autoprice.",
         ],

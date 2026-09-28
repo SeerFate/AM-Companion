@@ -30,6 +30,14 @@ export type SavedRoute = {
   demandL: number;
   demandH: number;
   notes: string;
+  /** Unscaled table demand, so a later economy correction can imply business and first. */
+  baseY?: number;
+  baseJ?: number;
+  baseF?: number;
+  aircraftId?: number | null;
+  copies?: number;
+  trips?: number;
+  costIndex?: number;
 };
 
 export type AirlineState = {
@@ -41,6 +49,8 @@ export type AirlineState = {
   fuelTraining: number;
   co2Training: number;
   repairTraining: number;
+  /** Multiplier on the published demand table. 1.03 means the game is 3% higher. */
+  demandScale: number;
   planes: OwnedPlane[];
   routes: SavedRoute[];
 };
@@ -56,6 +66,7 @@ export const emptyAirline = (): AirlineState => ({
   fuelTraining: 0,
   co2Training: 0,
   repairTraining: 0,
+  demandScale: 1,
   planes: [],
   routes: [],
 });

@@ -5,8 +5,10 @@ import {
   flightHours,
   fuelLbs,
   haversineKm,
+  recommendCi,
   optimalCargo,
   optimalPax,
+  routePairIndex,
 } from "./am4";
 
 const easy = optimalPax(5000, "easy");
@@ -42,9 +44,40 @@ assert.equal(seats.seats.f, 33);
 assert.equal(seats.seats.j, 65);
 assert.equal(seats.seats.y, 296);
 
+assert.equal(routePairIndex(0, 1, 4), 0);
+assert.equal(routePairIndex(1, 0, 4), 0);
+assert.equal(routePairIndex(0, 2, 4), 1);
+assert.equal(routePairIndex(2, 3, 4), 5);
+assert.equal(routePairIndex(3905, 3906, 3907), 7630370);
+
 const same = haversineKm(0, 0, 0, 0);
 assert.equal(same, 0);
 const fuel = fuelLbs({ consumption: 20, distanceKm: 5000, ci: 200 });
 assert.equal(fuel, 20 * 5000 * 1);
+
+const heldHigh = recommendCi({
+  distanceKm: 1500,
+  baseSpeed: 1000,
+  mode: "easy",
+  slotHours: 2,
+  minCi: 200,
+  optimalCi: 200,
+  around: null,
+  windowHours: 0.75,
+});
+assert.equal(heldHigh, null);
+
+const atFullSpeed = recommendCi({
+  distanceKm: 1500,
+  baseSpeed: 1000,
+  mode: "easy",
+  slotHours: 1.05,
+  minCi: 0,
+  optimalCi: 200,
+  around: 10,
+  windowHours: 0.2,
+});
+assert.equal(atFullSpeed?.ci, 200);
+assert.ok(atFullSpeed && atFullSpeed.hours <= 1.05);
 
 console.log("am4 checks passed");

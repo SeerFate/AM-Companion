@@ -25,6 +25,13 @@ const PAX_MARKUP = { y: 1.1, j: 1.08, f: 1.06 } as const;
 const CARGO_MARKUP = { large: 1.1, heavy: 1.08 } as const;
 const PAX_UNITS: Record<Cabin, number> = { y: 1, j: 2, f: 3 };
 
+/** Index of an undirected pair in a strictly upper-triangular n×n table. */
+export function routePairIndex(a: number, b: number, n: number): number {
+  const i = a < b ? a : b;
+  const j = a < b ? b : a;
+  return (i * (2 * n - i - 1)) / 2 + (j - i - 1);
+}
+
 export function haversineKm(
   lat1: number,
   lng1: number,
@@ -76,6 +83,60 @@ export function ciForSlot(
     hours = t;
   }
   return { ci, hours };
+}
+
+function clampCi(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(200, Math.max(0, Math.round(value)));
+}
+
+/**
+ * Cost index for a target block time.
+ * Without `around`, this is the slowest index at or above `minCi` that still
+ * finishes inside the slot. With `around`, the index stays within that many
+ * points of `optimalCi` and is the one in that band closest to it.
+ */
+export function recommendCi(input: {
+  distanceKm: number;
+  baseSpeed: number;
+  mode: GameMode;
+  slotHours: number;
+  minCi: number;
+  optimalCi: number;
+  around: number | null;
+  windowHours: number;
+}): { ci: number; hours: number } | null {
+  const minCi = clampCi(input.minCi);
+  const optimal = clampCi(input.optimalCi);
+  const around = input.around == null || !Number.isFinite(input.around) ? null : Math.max(0, Math.round(input.around));
+  const low = around == null ? minCi : Math.max(minCi, optimal - around);
+  const high = around == null ? 200 : Math.min(200, optimal + around);
+  if (low > high) return null;
+
+  if (around == null) {
+    const stretched = ciForSlot(input.distanceKm, input.baseSpeed, input.mode, input.slotHours);
+    if (!stretched) return null;
+    const ci = Math.max(stretched.ci, minCi);
+    const hours =
+      ci === stretched.ci
+        ? stretched.hours
+        : flightHours(input.distanceKm, input.baseSpeed, input.mode, ci);
+    if (hours > input.slotHours + 1e-4) return null;
+    if (input.slotHours - hours > input.windowHours) return null;
+    return { ci, hours };
+  }
+
+  let best: { ci: number; hours: number; distance: number } | null = null;
+  for (let ci = low; ci <= high; ci += 1) {
+    const hours = flightHours(input.distanceKm, input.baseSpeed, input.mode, ci);
+    if (hours > input.slotHours + 1e-4) continue;
+    if (input.slotHours - hours > input.windowHours) continue;
+    const distance = Math.abs(ci - optimal);
+    if (!best || distance < best.distance || (distance === best.distance && ci > best.ci)) {
+      best = { ci, hours, distance };
+    }
+  }
+  return best ? { ci: best.ci, hours: best.hours } : null;
 }
 
 export function floorTo(value: number, step: number): number {

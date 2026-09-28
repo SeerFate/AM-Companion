@@ -39,7 +39,12 @@ export function AirportPicker({
   const listId = useId();
   const hits = searchAirports(query);
 
-  useEffect(() => setQuery(value), [value]);
+  useEffect(() => {
+    if (!value) return;
+    const found = airport(value);
+    if (!found) return;
+    setQuery(`${found.iata} · ${found.icao} · ${found.name}`);
+  }, [value]);
 
   return (
     <Field label={label}>
@@ -48,7 +53,7 @@ export function AirportPicker({
           value={query}
           aria-controls={listId}
           aria-expanded={open}
-          placeholder="IATA, city, or country"
+          placeholder="IATA, ICAO, city, or country"
           onChange={(event) => {
             const next = event.target.value;
             setQuery(next);
@@ -70,12 +75,13 @@ export function AirportPicker({
                   className="flex w-full items-baseline justify-between gap-3 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
                   onClick={() => {
                     onChange(hit.iata);
-                    setQuery(`${hit.iata} · ${hit.name}`);
+                    setQuery(`${hit.iata} · ${hit.icao} · ${hit.name}`);
                     setOpen(false);
                   }}
                 >
                   <span>
-                    <span className="font-mono text-primary">{hit.iata}</span> {hit.name}
+                    <span className="font-mono text-primary">{hit.iata}</span>{" "}
+                    <span className="font-mono text-xs text-muted-foreground">{hit.icao}</span> {hit.name}
                   </span>
                   <span className="text-xs text-muted-foreground">{hit.country}</span>
                 </button>
@@ -155,12 +161,14 @@ export function NumberField({
   onChange,
   step = 1,
   min = 0,
+  onBlur,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
   step?: number;
   min?: number;
+  onBlur?: () => void;
 }) {
   return (
     <Field label={label}>
@@ -170,6 +178,7 @@ export function NumberField({
         step={step}
         value={Number.isFinite(value) ? value : 0}
         onChange={(event) => onChange(Number(event.target.value))}
+        onBlur={onBlur}
       />
     </Field>
   );
